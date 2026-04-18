@@ -1,0 +1,19 @@
+[Unit]
+Description=Center New Windows on Mouse Monitor
+# Removed dependency on graphical-session.target which was inactive
+After=default.target
+
+[Service]
+# Ensure the environment knows which display to target
+Environment="DISPLAY=:0"
+ExecStart=%h/bin/move-center-window.sh
+
+# Restart Logic
+Restart=always
+RestartSec=3
+# This line prevents systemd from giving up after repeated crashes
+StartLimitIntervalSec=0
+
+[Install]
+# Standard target for user-level background services
+WantedBy=default.target
