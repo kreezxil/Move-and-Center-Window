@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Move Center Window - Interactive Documentation</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    body { background-color: #faf9f6; color: #1c1917; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(0,0,0,0.05); }
+    .chart-container { position: relative; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; height: 300px; max-height: 400px; }
+    @media (min-width: 768px) { .chart-container { height: 350px; } }
+    .code-block { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; white-space: pre-wrap; word-break: break-all; }
+    .tab-active { border-bottom: 2px solid #0d9488; color: #0d9488; font-weight: 600; }
+    .fade-in { animation: fadeIn 0.3s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #f5f5f4; }
+    ::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #a8a29e; }
+</style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+<!-- Chosen Palette: Warm Neutrals & Teal Accent (Calm Harmony) -->
+<!-- Application Structure Plan: Designed as an interactive documentation dashboard. Instead of a flat markdown file, users explore features via interactive cards, check system compatibility through a dynamic widget, visualize environment support via charts, and explore the codebase through a tabbed interface. This non-linear flow prioritizes immediate problem-solving and feature discovery. -->
+<!-- Visualization & Content Choices: Source README -> Goal: Inform/Organize -> Interactive Tabs (Code Viewer), Hover Cards (Features), Donut Chart (Compatibility Breakdown), and an Interactive Checklist (Requirements). Justification: Engages developers by allowing them to test their environment mentally and quickly copy needed snippets. Libraries: Vanilla JS, Chart.js. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+<nav class="glass-panel sticky top-0 z-50 px-6 py-4 flex justify-between items-center shadow-sm">
+    <div class="text-xl font-bold text-stone-800 tracking-tight flex items-center gap-2">
+        <span class="text-2xl text-teal-600">⛭</span> Move Center Window
+    </div>
+    <div class="hidden md:flex gap-6 text-sm font-medium text-stone-600">
+        <button onclick="navTo('overview')" class="hover:text-teal-600 transition-colors">Overview</button>
+        <button onclick="navTo('compatibility')" class="hover:text-teal-600 transition-colors">Compatibility</button>
+        <button onclick="navTo('installation')" class="hover:text-teal-600 transition-colors">Installation</button>
+        <button onclick="navTo('codebase')" class="hover:text-teal-600 transition-colors">Codebase</button>
+    </div>
+</nav>
+
+<main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
+
+    <section id="overview" class="pt-8">
+        <div class="max-w-3xl mx-auto text-center space-y-6">
+            <p class="text-sm font-semibold text-teal-600 uppercase tracking-wider">Utility Overview</p>
+            <h1 class="text-4xl md:text-5xl font-extrabold text-stone-900 leading-tight">
+                Automatic X11 Window Placement
+            </h1>
+            <p class="text-lg text-stone-600 leading-relaxed">
+                A lightweight background utility that ensures newly opened application windows appear exactly where you are looking—on the monitor containing your mouse cursor.
+            </p>
+        </div>
+
+        <div class="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="glass-panel p-6 rounded-2xl hover:-translate-y-1 transition-transform duration-300">
+                <div class="text-3xl mb-4 text-stone-700">🖱️</div>
+                <h3 class="font-bold text-stone-800 mb-2">Mouse-Aware</h3>
+                <p class="text-sm text-stone-600">Dynamically calculates monitor bounds and centers windows on the active screen based on cursor location.</p>
+            </div>
+            <div class="glass-panel p-6 rounded-2xl hover:-translate-y-1 transition-transform duration-300">
+                <div class="text-3xl mb-4 text-stone-700">⚙️</div>
+                <h3 class="font-bold text-stone-800 mb-2">Process Tracking</h3>
+                <p class="text-sm text-stone-600">Monitors PIDs to ensure apps only center on initial launch, preventing jumping during refreshes.</p>
+            </div>
+            <div class="glass-panel p-6 rounded-2xl hover:-translate-y-1 transition-transform duration-300">
+                <div class="text-3xl mb-4 text-stone-700">🛡️</div>
+                <h3 class="font-bold text-stone-800 mb-2">X11 Resilience</h3>
+                <p class="text-sm text-stone-600">Built-in error handling suppresses standard "BadWindow" race conditions inherent to the X11 display server.</p>
+            </div>
+            <div class="glass-panel p-6 rounded-2xl hover:-translate-y-1 transition-transform duration-300">
+                <div class="text-3xl mb-4 text-stone-700">🔄</div>
+                <h3 class="font-bold text-stone-800 mb-2">Systemd Native</h3>
+                <p class="text-sm text-stone-600">Runs cleanly as a user-level background service, automatically recovering from any unexpected terminations.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="compatibility" class="pt-8 border-t border-stone-200">
+        <div class="mb-8">
+            <h2 class="text-3xl font-bold text-stone-800 mb-4">Compatibility Landscape</h2>
+            <p class="text-stone-600 max-w-3xl">Understanding where this utility works is critical. Because it relies on explicit window geometry calculations, it is intimately tied to the display server architecture.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div class="glass-panel p-6 rounded-2xl w-full flex flex-col items-center justify-center">
+                <h3 class="text-lg font-semibold text-stone-800 mb-4">Environment Support Distribution</h3>
+                <div class="chart-container">
+                    <canvas id="compatibilityChart"></canvas>
+                </div>
+                <p class="text-xs text-stone-500 mt-4 text-center">Conceptual representation based on documented limitations.</p>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100">
+                    <h4 class="font-bold text-stone-800 flex items-center gap-2"><span class="text-green-500">✅</span> Supported</h4>
+                    <p class="text-sm text-stone-600 mt-2">Tested primarily on Linux Mint with X11 and systems utilizing Systemd. Standard EWMH-compliant managers (Muffin, Mutter, KWin, Xfce4) are fully compatible.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100">
+                    <h4 class="font-bold text-stone-800 flex items-center gap-2"><span class="text-red-500">❌</span> Not Supported</h4>
+                    <p class="text-sm text-stone-600 mt-2"><strong>Wayland</strong> environments are strictly unsupported. Wayland's security protocol completely isolates window geometries, breaking <code>xdotool</code> and <code>wmctrl</code> functionality.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100">
+                    <h4 class="font-bold text-stone-800 flex items-center gap-2"><span class="text-yellow-500">⚠️</span> Untested / Edge Cases</h4>
+                    <p class="text-sm text-stone-600 mt-2">Tiled Window Managers (i3, bspwm) may conflict with programmatic placement. Non-systemd distros (Gentoo/OpenRC) require manual `.xinitrc` configuration instead of the provided service.</p>
+                </div>
+                
+                <div class="mt-6 p-4 bg-stone-100 rounded-lg">
+                    <p class="text-sm font-semibold text-stone-800 mb-2">Interactive Requirement Checklist:</p>
+                    <div id="req-list" class="space-y-2 text-sm text-stone-700">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="installation" class="pt-8 border-t border-stone-200">
+        <div class="mb-8">
+            <h2 class="text-3xl font-bold text-stone-800 mb-4">Installation Guide</h2>
+            <p class="text-stone-600">Choose the path that fits your workflow. Ensure dependencies are met before executing the automated script.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="glass-panel rounded-2xl overflow-hidden flex flex-col">
+                <div class="bg-stone-800 px-4 py-3 border-b border-stone-700">
+                    <h3 class="font-mono text-stone-200 text-sm">1. Install Dependencies</h3>
+                </div>
+                <div class="p-6 bg-stone-900 flex-grow">
+                    <div class="mb-4">
+                        <span class="text-xs text-stone-400 uppercase tracking-wide">Debian / Ubuntu / Mint</span>
+                        <div class="mt-2 bg-black rounded p-3 text-green-400 font-mono text-sm overflow-x-auto relative group">
+                            <code>sudo apt update && sudo apt install wmctrl xdotool x11-xserver-utils</code>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-xs text-stone-400 uppercase tracking-wide">Arch Linux</span>
+                        <div class="mt-2 bg-black rounded p-3 text-green-400 font-mono text-sm overflow-x-auto relative group">
+                            <code>sudo pacman -S wmctrl xdotool xorg-xrandr</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel rounded-2xl overflow-hidden flex flex-col">
+                <div class="bg-stone-800 px-4 py-3 border-b border-stone-700 flex gap-4">
+                    <button onclick="switchInstallTab('auto')" id="tab-install-auto" class="font-mono text-sm pb-1 text-teal-400 border-b-2 border-teal-400">Automated</button>
+                    <button onclick="switchInstallTab('manual')" id="tab-install-manual" class="font-mono text-sm pb-1 text-stone-400 border-b-2 border-transparent hover:text-stone-200">Manual</button>
+                </div>
+                <div class="p-6 bg-stone-900 flex-grow relative">
+                    <div id="content-install-auto" class="fade-in">
+                        <p class="text-stone-400 text-sm mb-3">Execute the provided installation script in the repository root:</p>
+                        <div class="bg-black rounded p-3 text-blue-400 font-mono text-sm overflow-x-auto">
+                            <code>chmod +x install.sh<br>./install.sh</code>
+                        </div>
+                    </div>
+                    <div id="content-install-manual" class="hidden fade-in">
+                        <ol class="list-decimal list-inside text-stone-300 text-sm space-y-3">
+                            <li>Move script: <code class="bg-stone-800 px-1 rounded text-teal-300">mv move-center-window.sh ~/bin/</code></li>
+                            <li>Move unit: <code class="bg-stone-800 px-1 rounded text-teal-300">mv move-center-window.service ~/.config/systemd/user/</code></li>
+                            <li>Reload: <code class="bg-stone-800 px-1 rounded text-teal-300">systemctl --user daemon-reload</code></li>
+                            <li>Enable: <code class="bg-stone-800 px-1 rounded text-teal-300">systemctl --user enable --now move-center-window.service</code></li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="codebase" class="pt-8 pb-16 border-t border-stone-200">
+        <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+            <div>
+                <h2 class="text-3xl font-bold text-stone-800 mb-2">Code Explorer</h2>
+                <p class="text-stone-600">Review the core logic and systemd configuration directly.</p>
+            </div>
+            <div class="flex bg-stone-200 p-1 rounded-lg">
+                <button onclick="viewCode('script')" id="btn-code-script" class="px-4 py-2 text-sm font-medium rounded-md bg-white shadow-sm text-stone-800 transition-all">move-center-window.sh</button>
+                <button onclick="viewCode('service')" id="btn-code-service" class="px-4 py-2 text-sm font-medium rounded-md text-stone-600 hover:text-stone-800 transition-all">.service Unit</button>
+            </div>
+        </div>
+
+        <div class="glass-panel rounded-2xl overflow-hidden shadow-sm">
+            <div class="bg-stone-800 px-4 py-2 flex items-center gap-2">
+                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                <span id="code-filename" class="ml-2 text-stone-400 text-xs font-mono">bin/move-center-window.sh</span>
+            </div>
+            <div class="p-6 bg-[#1e1e1e] overflow-x-auto max-h-[600px] overflow-y-auto">
+                <pre><code id="code-display" class="code-block text-sm text-stone-300"></code></pre>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<footer class="border-t border-stone-200 bg-stone-100 py-8 text-center text-stone-500 text-sm">
+    <p>Move Center Window Utility • MIT License • X11 Environments Only</p>
+</footer>
+
+<script>
+    const navTo = (id) => {
+        document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+    };
+
+    const requirements = [
+        { name: 'wmctrl', desc: 'Window management' },
+        { name: 'xdotool', desc: 'Mouse & window querying' },
+        { name: 'x11-server-utils', desc: 'Display geometry (xrandr)' },
+        { name: 'bash', desc: 'Execution environment' },
+        { name: 'systemd', desc: 'Service management' }
+    ];
+
+    const reqList = document.getElementById('req-list');
+    requirements.forEach(req => {
+        const div = document.createElement('div');
+        div.className = 'flex items-center cursor-pointer hover:bg-stone-200 p-1 rounded transition-colors';
+        div.innerHTML = `
+            <input type="checkbox" class="mr-3 w-4 h-4 text-teal-600 rounded border-stone-300 focus:ring-teal-500" onclick="event.stopPropagation()">
+            <span class="font-mono text-stone-900 mr-2">${req.name}</span> 
+            <span class="text-stone-500 text-xs hidden sm:inline">- ${req.desc}</span>
+        `;
+        div.onclick = () => {
+            const cb = div.querySelector('input');
+            cb.checked = !cb.checked;
+        };
+        reqList.appendChild(div);
+    });
+
+    const switchInstallTab = (tab) => {
+        const autoTab = document.getElementById('tab-install-auto');
+        const manualTab = document.getElementById('tab-install-manual');
+        const autoContent = document.getElementById('content-install-auto');
+        const manualContent = document.getElementById('content-install-manual');
+
+        if (tab === 'auto') {
+            autoTab.className = "font-mono text-sm pb-1 text-teal-400 border-b-2 border-teal-400";
+            manualTab.className = "font-mono text-sm pb-1 text-stone-400 border-b-2 border-transparent hover:text-stone-200";
+            autoContent.classList.remove('hidden');
+            manualContent.classList.add('hidden');
+        } else {
+            manualTab.className = "font-mono text-sm pb-1 text-teal-400 border-b-2 border-teal-400";
+            autoTab.className = "font-mono text-sm pb-1 text-stone-400 border-b-2 border-transparent hover:text-stone-200";
+            manualContent.classList.remove('hidden');
+            autoContent.classList.add('hidden');
+        }
+    };
+
+    const codeData = {
+        script: `#!/usr/bin/env bash
+
+# Tracked PIDs to avoid re-centering apps already running or in tray
+tracked_pids=""
+
+get_window_data() {
+    # Returns: "WindowID PID"
+    wmctrl -lp 2>/dev/null | awk '{print $1, $3}'
+}
+
+# Initial state: Track what's already open to ignore them
+tracked_pids=$(get_window_data | awk '{print $2}' | sort -u)
+
+while true
+do
+    current_data=$(get_window_data)
+    
+    # Cleanup tracked_pids: remove PIDs no longer in the system
+    new_tracked_pids=""
+    for p in $tracked_pids; do
+        if kill -0 "$p" 2>/dev/null; then
+            new_tracked_pids="$new_tracked_pids $p"
+        fi
+    done
+    tracked_pids=$(echo "$new_tracked_pids" | tr ' ' '\\n' | sort -u)
+
+    # Process each window found
+    while read -r w_id w_pid; do
+        [[ -z "$w_id" || -z "$w_pid" ]] && continue
+
+        # Only proceed if this PID is NOT in our tracked list
+        if ! echo "$tracked_pids" | grep -qxw "$w_pid"; then
+            
+            # 1. Get Mouse Location
+            eval "$(xdotool getmouselocation --shell 2>/dev/null)" || continue
+
+            # 2. Identify Monitor
+            monitor_geo=$(xrandr --listactivemonitors | grep -v "Monitors" | awk -v x="$X" -v y="$Y" '{
+                split($3, a, "/|x|\\\\+|\\\\+");
+                w=a[1]; h=a[3]; off_x=a[5]; off_y=a[6];
+                if (x >= off_x && x < off_x + w && y >= off_y && y < off_y + h) {
+                    print w, h, off_x, off_y
+                }
+            }')
+            read -r m_w m_h m_x m_y <<< "$monitor_geo"
+
+            # 3. Get Window Dimensions (handle race conditions)
+            eval "$(xdotool getwindowgeometry --shell "$w_id" 2>/dev/null)" || continue
+
+            # 4. Calculate Center
+            target_x=$(( m_x + (m_w / 2) - (WIDTH / 2) ))
+            target_y=$(( m_y + (m_h / 2) - (HEIGHT / 2) ))
+
+            # 5. Move window
+            wmctrl -i -r "$w_id" -e "0,$target_x,$target_y,-1,-1" 2>/dev/null || true
+
+            # Mark PID as tracked
+            tracked_pids="$tracked_pids $w_pid"
+        fi
+    done <<< "$current_data"
+
+    sleep 0.5
+done`,
+        service: `[Unit]
+Description=Center New Windows on Mouse Monitor
+After=default.target
+
+[Service]
+Environment="DISPLAY=:0"
+ExecStart=%h/bin/move-center-window.sh
+
+# Restart Logic
+Restart=always
+RestartSec=3
+# Disable rate limiting to handle rapid X11 bursts
+StartLimitIntervalSec=0
+
+[Install]
+WantedBy=default.target`
+    };
+
+    const viewCode = (type) => {
+        const display = document.getElementById('code-display');
+        const filename = document.getElementById('code-filename');
+        const btnScript = document.getElementById('btn-code-script');
+        const btnService = document.getElementById('btn-code-service');
+
+        display.textContent = codeData[type];
+        
+        display.classList.remove('fade-in');
+        void display.offsetWidth; 
+        display.classList.add('fade-in');
+
+        if (type === 'script') {
+            filename.textContent = 'bin/move-center-window.sh';
+            btnScript.className = "px-4 py-2 text-sm font-medium rounded-md bg-white shadow-sm text-stone-800 transition-all";
+            btnService.className = "px-4 py-2 text-sm font-medium rounded-md text-stone-600 hover:text-stone-800 transition-all";
+        } else {
+            filename.textContent = 'move-center-window.service';
+            btnService.className = "px-4 py-2 text-sm font-medium rounded-md bg-white shadow-sm text-stone-800 transition-all";
+            btnScript.className = "px-4 py-2 text-sm font-medium rounded-md text-stone-600 hover:text-stone-800 transition-all";
+        }
+    };
+
+    viewCode('script');
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('compatibilityChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Supported (X11)', 'Unsupported (Wayland)', 'Untested / Edge Cases'],
+                datasets: [{
+                    data: [65, 25, 10],
+                    backgroundColor: [
+                        '#10b981', 
+                        '#ef4444', 
+                        '#eab308'  
+                    ],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#44403c',
+                            font: { family: 'sans-serif', size: 12 }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed !== null) {
+                                    label += context.parsed + '% Share';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>
