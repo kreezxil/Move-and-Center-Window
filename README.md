@@ -93,7 +93,7 @@ chmod +x install.sh
 #!/usr/bin/env bash
 
 # List of WM_CLASS names to ignore (space separated)
-# Use 'xprop WM_CLASS' and click a window to find its class name
+# Case-insensitive. Example: "guake slack discord"
 DISALLOWED_CLASSES="guake"
 
 # Tracked PIDs to avoid re-centering apps already running or in tray
@@ -106,6 +106,9 @@ get_window_data() {
 
 # Initial state: Track what's already open to ignore them
 tracked_pids=$(get_window_data | awk '{print $2}' | sort -u)
+
+# Create a regex pattern for disallowed classes (e.g., "guake|slack")
+FILTER_PATTERN=$(echo "$DISALLOWED_CLASSES" | sed 's/ /|/g')
 
 while true
 do
@@ -127,9 +130,8 @@ do
         # Only proceed if this PID is NOT in our tracked list
         if ! echo "$tracked_pids" | grep -qxw "$w_pid"; then
             
-            # Filter check: ignore windows in the disallowed list
-            w_class=$(xprop -id "$w_id" WM_CLASS 2>/dev/null | awk -F '"' '{print $4}')
-            if [[ " $DISALLOWED_CLASSES " =~ " $w_class " ]]; then
+            # Filter check: ignore windows if WM_CLASS matches disallowed list (case-insensitive)
+            if xprop -id "$w_id" WM_CLASS 2>/dev/null | grep -qiE "$FILTER_PATTERN"; then
                 # We track the PID anyway so we stop checking xprop for this process
                 tracked_pids="$tracked_pids $w_pid"
                 continue
@@ -165,7 +167,6 @@ do
 
     sleep 0.5
 done
-
 ```
 
 ### `move-center-window.service`
