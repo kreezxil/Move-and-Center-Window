@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
-# File to track PIDs across loops
+# List of WM_CLASS names to ignore (space separated)
+# Use 'xprop WM_CLASS' and click a window to find its class name
+DISALLOWED_CLASSES="guake"
+
+# Tracked PIDs to avoid re-centering apps already running or in tray
 tracked_pids=""
 
 get_window_data() {
@@ -14,10 +18,8 @@ tracked_pids=$(get_window_data | awk '{print $2}' | sort -u)
 while true
 do
     current_data=$(get_window_data)
-    current_pids=$(echo "$current_data" | awk '{print $2}' | sort -u)
-
-    # Clean up tracked_pids: remove PIDs that are no longer running
-    # This handles the "after they full closed once" requirement
+    
+    # Cleanup tracked_pids: remove PIDs no longer in the system
     new_tracked_pids=""
     for p in $tracked_pids; do
         if kill -0 "$p" 2>/dev/null; then
@@ -26,13 +28,21 @@ do
     done
     tracked_pids=$(echo "$new_tracked_pids" | tr ' ' '\n' | sort -u)
 
-    # Check each current window
+    # Process each window found
     while read -r w_id w_pid; do
-        [[ -z "$w_id" ]] && continue
+        [[ -z "$w_id" || -z "$w_pid" ]] && continue
 
         # Only proceed if this PID is NOT in our tracked list
         if ! echo "$tracked_pids" | grep -qxw "$w_pid"; then
             
+            # Filter check: ignore windows in the disallowed list
+            # We track them anyway so we don't keep polling xprop for them
+            w_class=$(xprop -id "$w_id" WM_CLASS 2>/dev/null | awk -F '"' '{print $4}')
+            if [[ " $DISALLOWED_CLASSES " =~ " $w_class " ]]; then
+                tracked_pids="$tracked_pids $w_pid"
+                continue
+            fi
+
             # 1. Get Mouse Location
             eval "$(xdotool getmouselocation --shell 2>/dev/null)" || continue
 
@@ -46,8 +56,7 @@ do
             }')
             read -r m_w m_h m_x m_y <<< "$monitor_geo"
 
-            # 3. Get Window Dimensions
-            # Use || continue to handle windows that close mid-script (BadWindow fix)
+            # 3. Get Window Dimensions (handle race conditions)
             eval "$(xdotool getwindowgeometry --shell "$w_id" 2>/dev/null)" || continue
 
             # 4. Calculate Center
@@ -57,7 +66,7 @@ do
             # 5. Move window
             wmctrl -i -r "$w_id" -e "0,$target_x,$target_y,-1,-1" 2>/dev/null || true
 
-            # Mark this PID as tracked so we don't move its future/refresh windows
+            # Mark PID as tracked
             tracked_pids="$tracked_pids $w_pid"
         fi
     done <<< "$current_data"

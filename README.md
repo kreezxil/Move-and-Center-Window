@@ -8,10 +8,11 @@ A lightweight background utility that ensures newly opened application windows a
 
 ## Features
 
-- 🖱️ **Mouse-Aware** — Dynamically calculates monitor bounds and centers windows on the active screen based on cursor location.
-- ⚙️ **Process Tracking** — Monitors PIDs to ensure apps only center on initial launch, preventing jumping during refreshes.
-- 🛡️ **X11 Resilience** — Built-in error handling suppresses standard "BadWindow" race conditions.
-- 🔄 **Systemd Native** — Runs cleanly as a user-level background service with automatic recovery.
+- **Mouse-Aware** — Dynamically calculates monitor bounds and centers windows on the active screen based on cursor location.
+- **Process Tracking** — Monitors PIDs to ensure apps only center on initial launch, preventing jumping during refreshes.
+- **App Filtering (Blacklist)**: Ability to ignore specific applications (e.g., Guake terminal) that manage their own positioning via `WM_CLASS` filtering.
+- **X11 Resilience** — Built-in error handling suppresses standard "BadWindow" race conditions.
+- **Systemd Native** — Runs cleanly as a user-level background service with automatic recovery.
 
 ---
 
@@ -91,6 +92,10 @@ chmod +x install.sh
 ```bash
 #!/usr/bin/env bash
 
+# List of WM_CLASS names to ignore (space separated)
+# Use 'xprop WM_CLASS' and click a window to find its class name
+DISALLOWED_CLASSES="guake"
+
 # Tracked PIDs to avoid re-centering apps already running or in tray
 tracked_pids=""
 
@@ -122,12 +127,20 @@ do
         # Only proceed if this PID is NOT in our tracked list
         if ! echo "$tracked_pids" | grep -qxw "$w_pid"; then
             
+            # Filter check: ignore windows in the disallowed list
+            w_class=$(xprop -id "$w_id" WM_CLASS 2>/dev/null | awk -F '"' '{print $4}')
+            if [[ " $DISALLOWED_CLASSES " =~ " $w_class " ]]; then
+                # We track the PID anyway so we stop checking xprop for this process
+                tracked_pids="$tracked_pids $w_pid"
+                continue
+            fi
+
             # 1. Get Mouse Location
             eval "$(xdotool getmouselocation --shell 2>/dev/null)" || continue
 
             # 2. Identify Monitor
             monitor_geo=$(xrandr --listactivemonitors | grep -v "Monitors" | awk -v x="$X" -v y="$Y" '{
-                split($3, a, "/|x|\\\\+|\\\\+");
+                split($3, a, "/|x|\\+|\\+");
                 w=a[1]; h=a[3]; off_x=a[5]; off_y=a[6];
                 if (x >= off_x && x < off_x + w && y >= off_y && y < off_y + h) {
                     print w, h, off_x, off_y
@@ -152,6 +165,7 @@ do
 
     sleep 0.5
 done
+
 ```
 
 ### `move-center-window.service`

@@ -24,8 +24,8 @@
 <body class="antialiased min-h-screen flex flex-col">
 
 <!-- Chosen Palette: Warm Neutrals & Teal Accent (Calm Harmony) -->
-<!-- Application Structure Plan: Designed as an interactive documentation dashboard. Instead of a flat markdown file, users explore features via interactive cards, check system compatibility through a dynamic widget, visualize environment support via charts, and explore the codebase through a tabbed interface. This non-linear flow prioritizes immediate problem-solving and feature discovery. -->
-<!-- Visualization & Content Choices: Source README -> Goal: Inform/Organize -> Interactive Tabs (Code Viewer), Hover Cards (Features), Donut Chart (Compatibility Breakdown), and an Interactive Checklist (Requirements). Justification: Engages developers by allowing them to test their environment mentally and quickly copy needed snippets. Libraries: Vanilla JS, Chart.js. -->
+<!-- Application Structure Plan: Interactive documentation dashboard allowing non-linear exploration of features, compatibility, and source code. Updated to include app filtering logic. -->
+<!-- Visualization & Content Choices: Added "Disallowed Apps" section to feature cards. Updated shell script logic in Code Explorer and README. -->
 <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 
 <nav class="glass-panel sticky top-0 z-50 px-6 py-4 flex justify-between items-center shadow-sm">
@@ -53,7 +53,7 @@
             </p>
         </div>
 
-        <div class="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div class="glass-panel p-6 rounded-2xl hover:-translate-y-1 transition-transform duration-300">
                 <div class="text-3xl mb-4 text-stone-700">🖱️</div>
                 <h3 class="font-bold text-stone-800 mb-2">Mouse-Aware</h3>
@@ -65,14 +65,9 @@
                 <p class="text-sm text-stone-600">Monitors PIDs to ensure apps only center on initial launch, preventing jumping during refreshes.</p>
             </div>
             <div class="glass-panel p-6 rounded-2xl hover:-translate-y-1 transition-transform duration-300">
-                <div class="text-3xl mb-4 text-stone-700">🛡️</div>
-                <h3 class="font-bold text-stone-800 mb-2">X11 Resilience</h3>
-                <p class="text-sm text-stone-600">Built-in error handling suppresses standard "BadWindow" race conditions inherent to the X11 display server.</p>
-            </div>
-            <div class="glass-panel p-6 rounded-2xl hover:-translate-y-1 transition-transform duration-300">
-                <div class="text-3xl mb-4 text-stone-700">🔄</div>
-                <h3 class="font-bold text-stone-800 mb-2">Systemd Native</h3>
-                <p class="text-sm text-stone-600">Runs cleanly as a user-level background service, automatically recovering from any unexpected terminations.</p>
+                <div class="text-3xl mb-4 text-stone-700">🚫</div>
+                <h3 class="font-bold text-stone-800 mb-2">App Filtering</h3>
+                <p class="text-sm text-stone-600">Supports a blacklist (e.g., Guake) to ignore specific apps that manage their own positioning.</p>
             </div>
         </div>
     </section>
@@ -95,15 +90,11 @@
             <div class="space-y-6">
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100">
                     <h4 class="font-bold text-stone-800 flex items-center gap-2"><span class="text-green-500">✅</span> Supported</h4>
-                    <p class="text-sm text-stone-600 mt-2">Tested primarily on Linux Mint with X11 and systems utilizing Systemd. Standard EWMH-compliant managers (Muffin, Mutter, KWin, Xfce4) are fully compatible.</p>
+                    <p class="text-sm text-stone-600 mt-2">Tested primarily on Linux Mint with X11 and systems utilizing Systemd. Standard EWMH-compliant managers are fully compatible.</p>
                 </div>
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100">
                     <h4 class="font-bold text-stone-800 flex items-center gap-2"><span class="text-red-500">❌</span> Not Supported</h4>
-                    <p class="text-sm text-stone-600 mt-2"><strong>Wayland</strong> environments are strictly unsupported. Wayland's security protocol completely isolates window geometries, breaking <code>xdotool</code> and <code>wmctrl</code> functionality.</p>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100">
-                    <h4 class="font-bold text-stone-800 flex items-center gap-2"><span class="text-yellow-500">⚠️</span> Untested / Edge Cases</h4>
-                    <p class="text-sm text-stone-600 mt-2">Tiled Window Managers (i3, bspwm) may conflict with programmatic placement. Non-systemd distros (Gentoo/OpenRC) require manual `.xinitrc` configuration instead of the provided service.</p>
+                    <p class="text-sm text-stone-600 mt-2"><strong>Wayland</strong> environments are strictly unsupported. Wayland's security protocol completely isolates window geometries.</p>
                 </div>
                 
                 <div class="mt-6 p-4 bg-stone-100 rounded-lg">
@@ -130,13 +121,7 @@
                     <div class="mb-4">
                         <span class="text-xs text-stone-400 uppercase tracking-wide">Debian / Ubuntu / Mint</span>
                         <div class="mt-2 bg-black rounded p-3 text-green-400 font-mono text-sm overflow-x-auto relative group">
-                            <code>sudo apt update && sudo apt install wmctrl xdotool x11-xserver-utils</code>
-                        </div>
-                    </div>
-                    <div>
-                        <span class="text-xs text-stone-400 uppercase tracking-wide">Arch Linux</span>
-                        <div class="mt-2 bg-black rounded p-3 text-green-400 font-mono text-sm overflow-x-auto relative group">
-                            <code>sudo pacman -S wmctrl xdotool xorg-xrandr</code>
+                            <code>sudo apt update && sudo apt install wmctrl xdotool x11-xserver-utils x11-utils</code>
                         </div>
                     </div>
                 </div>
@@ -207,6 +192,7 @@
         { name: 'wmctrl', desc: 'Window management' },
         { name: 'xdotool', desc: 'Mouse & window querying' },
         { name: 'x11-server-utils', desc: 'Display geometry (xrandr)' },
+        { name: 'x11-utils', desc: 'Window property lookup (xprop)' },
         { name: 'bash', desc: 'Execution environment' },
         { name: 'systemd', desc: 'Service management' }
     ];
@@ -249,6 +235,10 @@
     const codeData = {
         script: `#!/usr/bin/env bash
 
+# List of WM_CLASS names to ignore (space separated)
+# Use 'xprop WM_CLASS' and click a window to find its class name
+DISALLOWED_CLASSES="guake"
+
 # Tracked PIDs to avoid re-centering apps already running or in tray
 tracked_pids=""
 
@@ -280,6 +270,14 @@ do
         # Only proceed if this PID is NOT in our tracked list
         if ! echo "$tracked_pids" | grep -qxw "$w_pid"; then
             
+            # Filter check: ignore windows in the disallowed list
+            # We track them anyway so we don't keep polling xprop for them
+            w_class=$(xprop -id "$w_id" WM_CLASS 2>/dev/null | awk -F '"' '{print $4}')
+            if [[ " $DISALLOWED_CLASSES " =~ " $w_class " ]]; then
+                tracked_pids="$tracked_pids $w_pid"
+                continue
+            fi
+
             # 1. Get Mouse Location
             eval "$(xdotool getmouselocation --shell 2>/dev/null)" || continue
 
